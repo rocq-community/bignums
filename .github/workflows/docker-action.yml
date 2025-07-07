@@ -23,7 +23,7 @@ jobs:
         image:
           # we can't use coqorg/coq images to test bignums
           # since these images already include coq-bignums
-          - 'coqorg/base:4.14.1-flambda'
+          - 'coqorg/base:4.14.2-flambda'
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
