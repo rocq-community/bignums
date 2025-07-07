@@ -6,10 +6,6 @@
 (*         *       GNU Lesser General Public License Version 2.1        *)
 (************************************************************************)
 
-(* Poor's man DECLARE PLUGIN *)
-let __coq_plugin_name = "coq-bignums.plugin"
-let () = Mltop.add_known_module __coq_plugin_name
-
 (* digit-based syntax for int63, bigN bigZ and bigQ *)
 
 open Names
