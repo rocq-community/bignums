@@ -192,9 +192,12 @@ let bigN_list_of_constructors =
   build 0
 
 let declare_numeral_interpreter uid sc dir interp (patl,uninterp,b) =
-  let open Notation in
-  register_bignumeral_interpretation uid (interp,uninterp);
-  enable_prim_token_interpretation { pt_local = false;
+  (* interp summary, no object *)
+  Notation.declare_scope sc;
+  (* unsynchronized state *)
+  Notation.register_bignumeral_interpretation uid (interp,uninterp);
+  (* interp object *)
+  Notation.enable_prim_token_interpretation { pt_local = false;
     pt_scope = sc;
     pt_interp_info = Uid uid;
     pt_required = dir;
@@ -203,7 +206,6 @@ let declare_numeral_interpreter uid sc dir interp (patl,uninterp,b) =
 
 (* Actually declares the interpreter for bigN *)
 let () =
-  Notation.declare_scope bigN_scope;
   declare_numeral_interpreter "bignums.bigN" bigN_scope
     (bigN_path, bigN_module)
     interp_bigN
@@ -241,7 +243,6 @@ let uninterp_bigZ (AnyGlobConstr rc) =
 
 (* Actually declares the interpreter for bigZ *)
 let () =
-  Notation.declare_scope bigZ_scope;
   declare_numeral_interpreter "bignums.bigZ" bigZ_scope
     (bigZ_path, bigZ_module)
     interp_bigZ
@@ -263,7 +264,6 @@ let uninterp_bigQ (AnyGlobConstr rc) =
 
 (* Actually declares the interpreter for bigQ *)
 let () =
-  Notation.declare_scope bigQ_scope;
   declare_numeral_interpreter "bignums.bigQ" bigQ_scope
     (bigQ_path, bigQ_module)
     interp_bigQ
