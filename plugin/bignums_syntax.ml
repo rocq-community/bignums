@@ -191,19 +191,34 @@ let bigN_list_of_constructors =
   in
   build 0
 
+let cache_bignums o =
+  Notation.declare_scope o.Notation.pt_scope;
+  Notation.enable_prim_token_interpretation o
+
+let bignums_obj =
+  Libobject.declare_object @@
+  Libobject.superglobal_object_nodischarge "bignums_obj"
+    ~cache:cache_bignums
+    ~subst:None
+
 let declare_numeral_interpreter uid sc dir interp (patl,uninterp,b) =
-  let open Notation in
-  register_bignumeral_interpretation uid (interp,uninterp);
-  enable_prim_token_interpretation { pt_local = false;
-    pt_scope = sc;
-    pt_interp_info = Uid uid;
-    pt_required = dir;
-    pt_refs = patl;
-    pt_in_match = b }
+  (* unsynchronized state *)
+  Notation.register_bignumeral_interpretation uid (interp,uninterp);
+  let interp () = Lib.add_leaf (bignums_obj {
+      (* we wrap in out own object (to get superglobal instead of export),
+         so we pass local to the Notation layer *)
+      pt_local = true;
+      pt_scope = sc;
+      pt_interp_info = Uid uid;
+      pt_required = dir;
+      pt_refs = patl;
+      pt_in_match = b;
+    })
+  in
+  Mltop.declare_cache_obj_full (CacheObj { synterp = (fun () -> ()); interp; }) "coq-bignums.plugin"
 
 (* Actually declares the interpreter for bigN *)
 let () =
-  Notation.declare_scope bigN_scope;
   declare_numeral_interpreter "bignums.bigN" bigN_scope
     (bigN_path, bigN_module)
     interp_bigN
@@ -241,7 +256,6 @@ let uninterp_bigZ (AnyGlobConstr rc) =
 
 (* Actually declares the interpreter for bigZ *)
 let () =
-  Notation.declare_scope bigZ_scope;
   declare_numeral_interpreter "bignums.bigZ" bigZ_scope
     (bigZ_path, bigZ_module)
     interp_bigZ
@@ -263,7 +277,6 @@ let uninterp_bigQ (AnyGlobConstr rc) =
 
 (* Actually declares the interpreter for bigQ *)
 let () =
-  Notation.declare_scope bigQ_scope;
   declare_numeral_interpreter "bignums.bigQ" bigQ_scope
     (bigQ_path, bigQ_module)
     interp_bigQ
