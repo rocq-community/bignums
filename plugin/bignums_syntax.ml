@@ -203,7 +203,7 @@ let bignums_obj =
 
 let declare_numeral_interpreter uid sc dir interp (patl,uninterp,b) =
   (* unsynchronized state *)
-  Notation.register_bignumeral_interpretation uid (interp,uninterp);
+  let uid = Notation.register_bignumeral_interpretation uid (interp,uninterp) in
   let interp () = Lib.add_leaf (bignums_obj {
       (* we wrap in out own object (to get superglobal instead of export),
          so we pass local to the Notation layer *)
