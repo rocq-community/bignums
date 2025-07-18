@@ -273,7 +273,7 @@ intros x; case x; simpl ww_is_even.
  intros w1 w2; simpl.
  unfold base.
  rewrite Zplus_mod by zarith.
- rewrite (fun x y => (Zdivide_mod (x * y))).
+ rewrite (fun x y => (Z.mod0_divide (x * y))).
  rewrite Z.add_0_l; rewrite Zmod_mod by zarith.
  apply spec_w_is_even; zarith.
  apply Z.divide_mul_r; apply Zpower_divide; zarith.

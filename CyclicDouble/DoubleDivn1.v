@@ -87,7 +87,9 @@ Section GENDIVN1.
   Lemma spec_split : forall (n : nat) (x : zn2z (word w n)),
        let (h, l) := double_split w_0 n x in
        [!S n | x!] = [!n | h!] * double_wB w_digits n + [!n | l!].
-  Proof (spec_double_split w_0 w_digits w_to_Z spec_0).
+  Proof.
+    exact (spec_double_split w_0 w_digits w_to_Z spec_0).
+  Qed.
 
   Lemma spec_double_divn1_0 : forall n r a,
     [|r|] < [|b2p|] ->
