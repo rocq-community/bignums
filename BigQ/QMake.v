@@ -230,7 +230,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  generalize (Zgcd_div_pos (ZZ.to_Z p) (NN.to_Z q)). lia.
  replace (NN.to_Z q) with 0%Z in * by (symmetry; assumption).
  rewrite Zdiv_0_l in *; auto with zarith.
- apply Zgcd_div_swap0; lia.
+ apply Z.gcd_div_swap; lia.
  (* Gt *)
  qsimpl.
  assert (H' : Z.gcd (ZZ.to_Z p) (NN.to_Z q) = 0%Z).
@@ -253,10 +253,8 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  qsimpl.
  (* Lt *)
  qsimpl.
- rewrite Zgcd_1_rel_prime.
  destruct (Z_lt_le_dec 0 (NN.to_Z q)).
- apply Zis_gcd_rel_prime; auto with zarith.
- apply Zgcd_is_gcd.
+ apply Z.gcd_div_gcd; auto with zarith.
  replace (NN.to_Z q) with 0%Z in * by lia.
  rewrite Zdiv_0_l in *; lia.
  (* Gt *)
@@ -476,11 +474,9 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  simpl.
  split.
  nzsimpl.
- destruct (Zgcd_is_gcd (ZZ.to_Z n) (NN.to_Z d)).
- rewrite Z.mul_comm; symmetry; apply Zdivide_Zdiv_eq; auto with zarith.
+ rewrite Z.mul_comm; symmetry; apply Zdivide_Zdiv_eq; auto using Z.gcd_divide_l with zarith.
  nzsimpl.
- destruct (Zgcd_is_gcd (ZZ.to_Z n) (NN.to_Z d)).
- rewrite Z.mul_comm; symmetry; apply Zdivide_Zdiv_eq; auto with zarith.
+ rewrite Z.mul_comm; symmetry; apply Zdivide_Zdiv_eq; auto using Z.gcd_divide_r with zarith.
  Qed.
 
  Lemma spec_irred_zero : forall n d,
@@ -519,11 +515,9 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  generalize (Z.gcd_nonneg (ZZ.to_Z n) (NN.to_Z d)); lia.
 
  nzsimpl.
- rewrite Zgcd_1_rel_prime.
- apply Zis_gcd_rel_prime.
+ apply Z.gcd_div_gcd.
  generalize (NN.spec_pos d); lia.
  generalize (Z.gcd_nonneg (ZZ.to_Z n) (NN.to_Z d)); lia.
- apply Zgcd_is_gcd; auto.
  Qed.
 
  Definition mul_norm_Qz_Qq z n d :=
@@ -562,7 +556,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  rewrite Zdiv_gcd_zero in GT; auto with zarith.
  nsubst. rewrite Zdiv_0_l in *; discriminate.
  rewrite <- Z.mul_assoc, (Z.mul_comm (ZZ.to_Z n)), Z.mul_assoc.
- rewrite Zgcd_div_swap0; lia.
+ rewrite Z.gcd_div_swap; lia.
  Qed.
 
 #[global]
@@ -602,17 +596,16 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  intros; nzsimpl.
  rewrite Z2Pos.id; auto.
  apply Zgcd_mult_rel_prime.
- rewrite Zgcd_1_rel_prime.
- apply Zis_gcd_rel_prime.
+ apply Z.gcd_div_gcd.
  generalize (NN.spec_pos d); lia.
  generalize (Z.gcd_nonneg (ZZ.to_Z z) (NN.to_Z d)); lia.
- apply Zgcd_is_gcd.
- destruct (Zgcd_is_gcd (ZZ.to_Z z) (NN.to_Z d)) as [ (z0,Hz0) (d0,Hd0) Hzd].
+ destruct (Z.gcd_divide_l (ZZ.to_Z z) (NN.to_Z d)) as [ z0 Hz0 ].
+ destruct (Z.gcd_divide_r (ZZ.to_Z z) (NN.to_Z d)) as [ d0 Hd0 ].
+ pose proof (Z.gcd_greatest (ZZ.to_Z z) (NN.to_Z d)) as Hzd.
  replace (NN.to_Z d / Z.gcd (ZZ.to_Z z) (NN.to_Z d))%Z with d0.
- rewrite Zgcd_1_rel_prime in *.
- apply bezout_rel_prime.
- destruct (rel_prime_bezout _ _ H) as [u v Huv].
- apply Bezout_intro with u (v*(Z.gcd (ZZ.to_Z z) (NN.to_Z d)))%Z.
+ apply Z.coprime_Bezout.
+ destruct (Z.Bezout_coprime _ _ H) as [u [v Huv]].
+ exists u, (v*(Z.gcd (ZZ.to_Z z) (NN.to_Z d)))%Z.
  rewrite <- Huv; rewrite Hd0 at 2; ring.
  rewrite Hd0 at 1.
  symmetry; apply Z_div_mult_full; auto with zarith.
@@ -691,16 +684,14 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  apply Zgcd_mult_rel_prime; rewrite Z.gcd_comm;
   apply Zgcd_mult_rel_prime; rewrite Z.gcd_comm; auto.
 
- rewrite Zgcd_1_rel_prime in *.
- apply bezout_rel_prime.
- destruct (rel_prime_bezout (ZZ.to_Z ny) (NN.to_Z dy)) as [u v Huv]; trivial.
- apply Bezout_intro with (u*g')%Z (v*g)%Z.
+ apply Z.coprime_Bezout.
+ destruct (Z.Bezout_coprime (ZZ.to_Z ny) (NN.to_Z dy)) as [u [v Huv]]; trivial.
+ exists (u*g')%Z, (v*g)%Z.
  rewrite <- Huv, <- Hg1', <- Hg2. ring.
 
- rewrite Zgcd_1_rel_prime in *.
- apply bezout_rel_prime.
- destruct (rel_prime_bezout (ZZ.to_Z nx) (NN.to_Z dx)) as [u v Huv]; trivial.
- apply Bezout_intro with (u*g)%Z (v*g')%Z.
+ apply Z.coprime_Bezout.
+ destruct (Z.Bezout_coprime (ZZ.to_Z nx) (NN.to_Z dx)) as [u [v Huv]]; trivial.
+ exists (u*g)%Z, (v*g')%Z.
  rewrite <- Huv, <- Hg2', <- Hg1. ring.
  Qed.
 
@@ -878,9 +869,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  rewrite Z2Pos.id in *; auto.
  intros.
  rewrite Z.gcd_comm, Z.gcd_abs_l, Z.gcd_comm.
- apply Zis_gcd_gcd; auto with zarith.
- apply Zis_gcd_minus.
- rewrite Z.opp_involutive, <- H1; apply Zgcd_is_gcd.
+ rewrite Z.gcd_opp_l, Z.gcd_comm; assumption.
  rewrite Z.abs_neq; lia.
  Qed.
 
@@ -986,8 +975,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  rewrite Z.pow_0_l' in *; [lia|discriminate].
  rewrite Z2Pos.id in *; auto.
  rewrite NN.spec_pow_pos, ZZ.spec_pow_pos; auto.
- rewrite Zgcd_1_rel_prime in *.
- apply rel_prime_Zpower; auto with zarith.
+ apply Z.coprime_pow_l, Z.coprime_pow_r; auto with zarith.
  Qed.
 
  Definition power (x : t) (z : Z) : t :=

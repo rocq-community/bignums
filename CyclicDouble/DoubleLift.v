@@ -297,7 +297,7 @@ Section DoubleLift.
      rewrite spec_low.
      rewrite spec_ww_sub.
      unfold zdigits; rewrite spec_w_0W; rewrite spec_zdigits.
-     rewrite <- Zmod_div_mod; auto with zarith.
+     rewrite Z.mod_mod_divide; auto with zarith.
      rewrite Zmod_small; auto with zarith.
      split; auto with zarith.
      apply Z.le_lt_trans with (Zpos w_digits); auto with zarith.
@@ -392,7 +392,7 @@ Section DoubleLift.
      revert H1.
      rewrite spec_low.
      rewrite spec_ww_sub; w_rewrite; intros H1.
-     rewrite <- Zmod_div_mod; auto with zarith.
+     rewrite Z.mod_mod_divide; auto with zarith.
      rewrite Zmod_small; auto with zarith.
      split; auto with zarith.
      apply Z.le_lt_trans with (Zpos w_digits); auto with zarith.

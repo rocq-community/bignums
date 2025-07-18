@@ -139,7 +139,7 @@ Section POS_MOD.
     rewrite spec_low.
     rewrite spec_ww_sub.
     rewrite spec_w_0W; rewrite spec_zdigits.
-    rewrite <- Zmod_div_mod. 2-3: zarith.
+    rewrite Z.mod_mod_divide.
     rewrite Zmod_small. zarith.
     split. zarith.
     apply Z.lt_le_trans with (Zpos w_digits). zarith.

@@ -315,8 +315,7 @@ Theorem Zmod_le_first: forall a b, 0 <= a -> 0 < b -> 0 <= a mod b <= a.
   Z.gcd a b = 0.
  Proof.
  intros.
- generalize (Zgcd_is_gcd a b); destruct 1.
- destruct H2 as (k,Hk).
+ pose proof (Z.gcd_divide_r a b) as (k, Hk).
  generalize H; rewrite Hk at 1.
  destruct (Z.eq_dec (Z.gcd a b) 0) as [H'|H']; auto.
  rewrite Z_div_mult_full; auto.
@@ -326,9 +325,7 @@ Theorem Zmod_le_first: forall a b, 0 <= a -> 0 < b -> 0 <= a mod b <= a.
  Lemma Zgcd_mult_rel_prime : forall a b c,
   Z.gcd a c = 1 -> Z.gcd b c = 1 -> Z.gcd (a*b) c = 1.
  Proof.
- intros.
- rewrite Zgcd_1_rel_prime in *.
- apply rel_prime_sym; apply rel_prime_mult; apply rel_prime_sym; auto.
+   exact Z.coprime_mul_l.
  Qed.
 
  Lemma Zcompare_gt : forall (A:Type)(a a':A)(p q:Z),
