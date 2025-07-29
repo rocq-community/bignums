@@ -92,7 +92,7 @@ let word_of_pos_bigint ?loc hght n =
   let ref_WW = DAst.make ?loc @@ GRef (Lazy.force zn2z_WW, None) in
   let rec decomp hgt n =
     if hgt <= 0 then
-      DAst.make ?loc (GInt (Notation.int63_of_pos_bigint n))
+      DAst.make ?loc (GInt (PrimNotations.int63_of_pos_bigint n))
     else if Z.equal n Z.zero then
       DAst.make ?loc @@ GApp (ref_W0, [DAst.make ?loc @@ GHole (GInternalHole)])
     else
@@ -203,7 +203,7 @@ let bignums_obj =
 
 let declare_numeral_interpreter uid sc dir interp (patl,uninterp,b) =
   (* unsynchronized state *)
-  let uid = Notation.register_bignumeral_interpretation uid (interp,uninterp) in
+  let uid = PrimNotations.register_bignumeral_interpretation uid (interp,uninterp) in
   let interp () = Lib.add_leaf (bignums_obj {
       (* we wrap in out own object (to get superglobal instead of export),
          so we pass local to the Notation layer *)
