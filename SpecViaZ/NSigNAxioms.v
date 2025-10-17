@@ -21,7 +21,7 @@ Hint Rewrite
  spec_pow spec_even spec_odd spec_testbit spec_shiftl spec_shiftr
  spec_land spec_lor spec_ldiff spec_lxor spec_div2 spec_of_N
  : nsimpl.
-Ltac nsimpl := autorewrite with nsimpl.
+Ltac nsimpl := try (rewrite_strat (repeat (topdown (hints nsimpl)))).
 Ltac ncongruence := unfold eq, to_N; repeat red; intros; nsimpl; congruence.
 Ltac zify := unfold eq, lt, le, to_N in *; nsimpl.
 Ltac omega_pos n := generalize (spec_pos n); lia.

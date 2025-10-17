@@ -104,7 +104,7 @@ Lemma BigNdiv : div_theory BigN.eq BigN.add BigN.mul (@id _)
  (fun a b => if b =? 0 then (0,a) else BigN.div_eucl a b).
 Proof.
 constructor. unfold id. intros a b.
-BigN.zify.
+BigN.zify. autorewrite with nsimpl.
 case Z.eqb_spec.
 BigN.zify. auto with zarith.
 intros NEQ.
