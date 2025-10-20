@@ -102,7 +102,7 @@ Hint Rewrite
  spec_red spec_compare spec_eq_bool spec_min spec_max
  spec_add spec_sub spec_opp spec_mul spec_square spec_inv spec_div
  spec_power : qsimpl.
-Ltac qify := unfold eq, lt, le in *; autorewrite with qsimpl;
+Ltac qify := unfold eq, lt, le in *; try (rewrite_strat (repeat (topdown (hints qsimpl))));
  try rewrite spec_0 in *; try rewrite spec_1 in *; try rewrite spec_m1 in *.
 
 (** NB: do not add [spec_0] in the autorewrite database. Otherwise,

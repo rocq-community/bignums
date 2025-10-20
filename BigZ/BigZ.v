@@ -134,7 +134,7 @@ Lemma BigZdiv : div_theory BigZ.eq BigZ.add BigZ.mul (@id _)
  (fun a b => if b =? 0 then (0,a) else BigZ.div_eucl a b).
 Proof.
 constructor. unfold id. intros a b.
-BigZ.zify.
+BigZ.zify. autorewrite with zsimpl. 
 case Z.eqb_spec.
 BigZ.zify. auto with zarith.
 intros NEQ.
