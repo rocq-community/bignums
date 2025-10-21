@@ -23,7 +23,7 @@ Hint Rewrite
  spec_land spec_lor spec_ldiff spec_lxor spec_div2
  : zsimpl.
 
-Ltac zsimpl := try (rewrite_strat (repeat (topdown (hints zsimpl)))).
+Ltac zsimpl := autorewrite with zsimpl.
 Ltac zcongruence := repeat red; intros; zsimpl; congruence.
 Ltac zify := unfold eq, lt, le in *; zsimpl.
 
