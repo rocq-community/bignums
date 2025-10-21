@@ -97,7 +97,7 @@ constructor.
 intros. red. rewrite BigN.spec_pow, BigN.spec_of_N.
 rewrite Zpower_theory.(rpow_pow_N).
 destruct n; simpl. reflexivity.
-induction p; simpl; intros; BigN.zify; rewrite ?IHp; auto.
+induction p; simpl; intros; BigN.zify_strat; rewrite ?IHp; auto.
 Qed.
 
 Lemma BigNdiv : div_theory BigN.eq BigN.add BigN.mul (@id _)
@@ -106,13 +106,13 @@ Proof.
 constructor. unfold id. intros a b.
 BigN.zify.
 case Z.eqb_spec.
-BigN.zify. auto with zarith.
+BigN.zify_strat. auto with zarith.
 intros NEQ.
 generalize (BigN.spec_div_eucl a b).
 generalize (Z_div_mod_full (BigN.to_Z a) (BigN.to_Z b) NEQ).
 destruct BigN.div_eucl as (q,r), Z.div_eucl as (q',r').
 intros (EQ,_). injection 1 as EQr EQq.
-BigN.zify. rewrite EQr, EQq; auto.
+BigN.zify_strat. rewrite EQr, EQq; auto.
 Qed.
 
 
@@ -193,5 +193,5 @@ End TestOrder.
 
 Section TestLia.
 Let test : forall x y : bigN, x<=y -> y<=x -> x==y.
-Proof. intros x y. BigN.zify. lia. Defined.
+Proof. intros x y. BigN.zify_strat. lia. Defined.
 End TestLia.

@@ -22,8 +22,10 @@ Hint Rewrite
  spec_land spec_lor spec_ldiff spec_lxor spec_div2 spec_of_N
  : nsimpl.
 Ltac nsimpl := autorewrite with nsimpl.
+Ltac nsimpl_strat := try (rewrite_strat (repeat (topdown (hints nsimpl)))).
 Ltac ncongruence := unfold eq, to_N; repeat red; intros; nsimpl; congruence.
 Ltac zify := unfold eq, lt, le, to_N in *; nsimpl.
+Ltac zify_strat := unfold eq, lt, le, to_N in *; nsimpl_strat.
 Ltac omega_pos n := generalize (spec_pos n); lia.
 
 Local Obligation Tactic := ncongruence.
@@ -45,24 +47,24 @@ Program Instance mul_wd : Proper (eq==>eq==>eq) mul.
 
 Theorem pred_succ : forall n, pred (succ n) == n.
 Proof.
-intros. zify. omega_pos n.
+intros. zify_strat. omega_pos n.
 Qed.
 
 Theorem one_succ : 1 == succ 0.
 Proof.
-now zify.
+now zify_strat.
 Qed.
 
 Theorem two_succ : 2 == succ 1.
 Proof.
-now zify.
+now zify_strat.
 Qed.
 
 Definition N_of_Z z := of_N (Z.to_N z).
 
 Lemma spec_N_of_Z z : (0<=z)%Z -> [N_of_Z z] = z.
 Proof.
- unfold N_of_Z. zify. apply Z2N.id.
+ unfold N_of_Z. zify_strat. apply Z2N.id.
 Qed.
 
 Section Induction.
@@ -105,69 +107,69 @@ End Induction.
 
 Theorem add_0_l : forall n, 0 + n == n.
 Proof.
-intros. zify. auto with zarith.
+intros. zify_strat. auto with zarith.
 Qed.
 
 Theorem add_succ_l : forall n m, (succ n) + m == succ (n + m).
 Proof.
-intros. zify. auto with zarith.
+intros. zify_strat. auto with zarith.
 Qed.
 
 Theorem sub_0_r : forall n, n - 0 == n.
 Proof.
-intros. zify. omega_pos n.
+intros. zify_strat. omega_pos n.
 Qed.
 
 Theorem sub_succ_r : forall n m, n - (succ m) == pred (n - m).
 Proof.
-intros. zify. lia.
+intros. zify_strat. lia.
 Qed.
 
 Theorem mul_0_l : forall n, 0 * n == 0.
 Proof.
-intros. zify. auto with zarith.
+intros. zify_strat. auto with zarith.
 Qed.
 
 Theorem mul_succ_l : forall n m, (succ n) * m == n * m + m.
 Proof.
-intros. zify. ring.
+intros. zify_strat. ring.
 Qed.
 
 (** Order *)
 
 Lemma eqb_eq x y : eqb x y = true <-> x == y.
 Proof.
- zify. apply Z.eqb_eq.
+ zify_strat. apply Z.eqb_eq.
 Qed.
 
 Lemma leb_le x y : leb x y = true <-> x <= y.
 Proof.
- zify. apply Z.leb_le.
+ zify_strat. apply Z.leb_le.
 Qed.
 
 Lemma ltb_lt x y : ltb x y = true <-> x < y.
 Proof.
- zify. apply Z.ltb_lt.
+ zify_strat. apply Z.ltb_lt.
 Qed.
 
 Lemma compare_eq_iff n m : compare n m = Eq <-> n == m.
 Proof.
- intros. zify. apply Z.compare_eq_iff.
+ intros. zify_strat. apply Z.compare_eq_iff.
 Qed.
 
 Lemma compare_lt_iff n m : compare n m = Lt <-> n < m.
 Proof.
- intros. zify. reflexivity.
+ intros. zify_strat. reflexivity.
 Qed.
 
 Lemma compare_le_iff n m : compare n m <> Gt <-> n <= m.
 Proof.
- intros. zify. reflexivity.
+ intros. zify_strat. reflexivity.
 Qed.
 
 Lemma compare_antisym n m : compare m n = CompOpp (compare n m).
 Proof.
- intros. zify. apply Z.compare_antisym.
+ intros. zify_strat. apply Z.compare_antisym.
 Qed.
 
 Include BoolOrderFacts NN NN NN [no inline].
@@ -175,25 +177,25 @@ Include BoolOrderFacts NN NN NN [no inline].
 #[global]
 Instance compare_wd : Proper (eq ==> eq ==> Logic.eq) compare.
 Proof.
-intros x x' Hx y y' Hy. zify. now rewrite Hx, Hy.
+intros x x' Hx y y' Hy. zify_strat. now rewrite Hx, Hy.
 Qed.
 
 #[global]
 Instance eqb_wd : Proper (eq ==> eq ==> Logic.eq) eqb.
 Proof.
-intros x x' Hx y y' Hy. zify. now rewrite Hx, Hy.
+intros x x' Hx y y' Hy. zify_strat. now rewrite Hx, Hy.
 Qed.
 
 #[global]
 Instance ltb_wd : Proper (eq ==> eq ==> Logic.eq) ltb.
 Proof.
-intros x x' Hx y y' Hy. zify. now rewrite Hx, Hy.
+intros x x' Hx y y' Hy. zify_strat. now rewrite Hx, Hy.
 Qed.
 
 #[global]
 Instance leb_wd : Proper (eq ==> eq ==> Logic.eq) leb.
 Proof.
-intros x x' Hx y y' Hy. zify. now rewrite Hx, Hy.
+intros x x' Hx y y' Hy. zify_strat. now rewrite Hx, Hy.
 Qed.
 
 #[global]
@@ -204,34 +206,34 @@ Qed.
 
 Theorem lt_succ_r : forall n m, n < succ m <-> n <= m.
 Proof.
-intros. zify. lia.
+intros. zify_strat. lia.
 Qed.
 
 Theorem min_l : forall n m, n <= m -> min n m == n.
 Proof.
-now intros n m; zify; lia.
+now intros n m; zify_strat; lia.
 Qed.
 
 Theorem min_r : forall n m, m <= n -> min n m == m.
 Proof.
-now intros n m; zify; lia.
+now intros n m; zify_strat; lia.
 Qed.
 
 Theorem max_l : forall n m, m <= n -> max n m == n.
 Proof.
-now intros n m; zify; lia.
+now intros n m; zify_strat; lia.
 Qed.
 
 Theorem max_r : forall n m, n <= m -> max n m == m.
 Proof.
-now intros n m; zify; lia.
+now intros n m; zify_strat; lia.
 Qed.
 
 (** Properties specific to natural numbers, not integers. *)
 
 Theorem pred_0 : pred 0 == 0.
 Proof.
-zify. auto.
+zify_strat. auto.
 Qed.
 
 (** Power *)
@@ -241,40 +243,40 @@ Program Instance pow_wd : Proper (eq==>eq==>eq) pow.
 
 Lemma pow_0_r : forall a, a^0 == 1.
 Proof.
- intros. now zify.
+ intros. now zify_strat.
 Qed.
 
 Lemma pow_succ_r : forall a b, 0<=b -> a^(succ b) == a * a^b.
 Proof.
- intros a b. zify. intros. now Z.nzsimpl.
+ intros a b. zify_strat. intros. now Z.nzsimpl.
 Qed.
 
 Lemma pow_neg_r : forall a b, b<0 -> a^b == 0.
 Proof.
- intros a b. zify. intro Hb. exfalso. omega_pos b.
+ intros a b. zify_strat. intro Hb. exfalso. omega_pos b.
 Qed.
 
 Lemma pow_pow_N : forall a b, a^b == pow_N a (to_N b).
 Proof.
- intros. zify. f_equal.
+ intros. zify_strat. f_equal.
  now rewrite Z2N.id by apply spec_pos.
 Qed.
 
 Lemma pow_N_pow : forall a b, pow_N a b == a^(of_N b).
 Proof.
- intros. now zify.
+ intros. now zify_strat.
 Qed.
 
 Lemma pow_pos_N : forall a p, pow_pos a p == pow_N a (Npos p).
 Proof.
- intros. now zify.
+ intros. now zify_strat.
 Qed.
 
 (** Square *)
 
 Lemma square_spec n : square n == n * n.
 Proof.
- now zify.
+ now zify_strat.
 Qed.
 
 (** Sqrt *)
@@ -282,12 +284,12 @@ Qed.
 Lemma sqrt_spec : forall n, 0<=n ->
  (sqrt n)*(sqrt n) <= n /\ n < (succ (sqrt n))*(succ (sqrt n)).
 Proof.
- intros n. zify. apply Z.sqrt_spec.
+ intros n. zify_strat. apply Z.sqrt_spec.
 Qed.
 
 Lemma sqrt_neg : forall n, n<0 -> sqrt n == 0.
 Proof.
- intros n. zify. intro H. exfalso. omega_pos n.
+ intros n. zify_strat. intro H. exfalso. omega_pos n.
 Qed.
 
 (** Log2 *)
@@ -295,13 +297,13 @@ Qed.
 Lemma log2_spec : forall n, 0<n ->
  2^(log2 n) <= n /\ n < 2^(succ (log2 n)).
 Proof.
- intros n. zify. change (Z.log2 [n]+1)%Z with (Z.succ (Z.log2 [n])).
+ intros n. zify_strat. change (Z.log2 [n]+1)%Z with (Z.succ (Z.log2 [n])).
  apply Z.log2_spec.
 Qed.
 
 Lemma log2_nonpos : forall n, n<=0 -> log2 n == 0.
 Proof.
- intros n. zify. apply Z.log2_nonpos.
+ intros n. zify_strat. apply Z.log2_nonpos.
 Qed.
 
 (** Even / Odd *)
@@ -311,18 +313,18 @@ Definition Odd n := exists m, n == 2*m+1.
 
 Lemma even_spec n : even n = true <-> Even n.
 Proof.
- unfold Even. zify. rewrite Z.even_spec.
+ unfold Even. zify_strat. rewrite Z.even_spec.
  split; intros (m,Hm).
- - exists (N_of_Z m). zify. rewrite spec_N_of_Z; trivial. omega_pos n.
- - exists [m]. revert Hm; now zify.
+ - exists (N_of_Z m). zify_strat. rewrite spec_N_of_Z; trivial. omega_pos n.
+ - exists [m]. revert Hm; now zify_strat.
 Qed.
 
 Lemma odd_spec n : odd n = true <-> Odd n.
 Proof.
- unfold Odd. zify. rewrite Z.odd_spec.
+ unfold Odd. zify_strat. rewrite Z.odd_spec.
  split; intros (m,Hm).
- - exists (N_of_Z m). zify. rewrite spec_N_of_Z; trivial. omega_pos n.
- - exists [m]. revert Hm; now zify.
+ - exists (N_of_Z m). zify_strat. rewrite spec_N_of_Z; trivial. omega_pos n.
+ - exists [m]. revert Hm; now zify_strat.
 Qed.
 
 (** Div / Mod *)
@@ -334,13 +336,13 @@ Program Instance mod_wd : Proper (eq==>eq==>eq) modulo.
 
 Theorem div_mod : forall a b, ~b==0 -> a == b*(div a b) + (modulo a b).
 Proof.
-intros a b. zify. intros. apply Z.div_mod; auto.
+intros a b. zify_strat. intros. apply Z.div_mod; auto.
 Qed.
 
 Theorem mod_bound_pos : forall a b, 0<=a -> 0<b ->
  0 <= modulo a b /\ modulo a b < b.
 Proof.
-intros a b. zify. apply Z.mod_bound_pos.
+intros a b. zify_strat. apply Z.mod_bound_pos.
 Qed.
 
 (** Gcd *)
@@ -351,8 +353,8 @@ Local Notation "( x | y )" := (divide x y) (at level 0).
 Lemma spec_divide : forall n m, (n|m) <-> Z.divide [n] [m].
 Proof.
  intros n m. split.
- - intros (p,H). exists [p]. revert H; now zify.
- - intros (z,H). exists (of_N (Z.abs_N z)). zify.
+ - intros (p,H). exists [p]. revert H; now zify_strat.
+ - intros (z,H). exists (of_N (Z.abs_N z)). zify_strat.
    rewrite N2Z.inj_abs_N.
    rewrite <- (Z.abs_eq [m]), <- (Z.abs_eq [n]) by apply spec_pos.
    now rewrite H, Z.abs_mul.
@@ -360,22 +362,22 @@ Qed.
 
 Lemma gcd_divide_l : forall n m, (gcd n m | n).
 Proof.
- intros n m. apply spec_divide. zify. apply Z.gcd_divide_l.
+ intros n m. apply spec_divide. zify_strat. apply Z.gcd_divide_l.
 Qed.
 
 Lemma gcd_divide_r : forall n m, (gcd n m | m).
 Proof.
- intros n m. apply spec_divide. zify. apply Z.gcd_divide_r.
+ intros n m. apply spec_divide. zify_strat. apply Z.gcd_divide_r.
 Qed.
 
 Lemma gcd_greatest : forall n m p, (p|n) -> (p|m) -> (p|gcd n m).
 Proof.
- intros n m p. rewrite !spec_divide. zify. apply Z.gcd_greatest.
+ intros n m p. rewrite !spec_divide. zify_strat. apply Z.gcd_greatest.
 Qed.
 
 Lemma gcd_nonneg : forall n m, 0 <= gcd n m.
 Proof.
- intros. zify. apply Z.gcd_nonneg.
+ intros. zify_strat. apply Z.gcd_nonneg.
 Qed.
 
 (** Bitwise operations *)
@@ -385,77 +387,77 @@ Program Instance testbit_wd : Proper (eq==>eq==>Logic.eq) testbit.
 
 Lemma testbit_odd_0 : forall a, testbit (2*a+1) 0 = true.
 Proof.
- intros. zify. apply Z.testbit_odd_0.
+ intros. zify_strat. apply Z.testbit_odd_0.
 Qed.
 
 Lemma testbit_even_0 : forall a, testbit (2*a) 0 = false.
 Proof.
- intros. zify. apply Z.testbit_even_0.
+ intros. zify_strat. apply Z.testbit_even_0.
 Qed.
 
 Lemma testbit_odd_succ : forall a n, 0<=n ->
  testbit (2*a+1) (succ n) = testbit a n.
 Proof.
- intros a n. zify. apply Z.testbit_odd_succ.
+ intros a n. zify_strat. apply Z.testbit_odd_succ.
 Qed.
 
 Lemma testbit_even_succ : forall a n, 0<=n ->
  testbit (2*a) (succ n) = testbit a n.
 Proof.
- intros a n. zify. apply Z.testbit_even_succ.
+ intros a n. zify_strat. apply Z.testbit_even_succ.
 Qed.
 
 Lemma testbit_neg_r : forall a n, n<0 -> testbit a n = false.
 Proof.
- intros a n. zify. apply Z.testbit_neg_r.
+ intros a n. zify_strat. apply Z.testbit_neg_r.
 Qed.
 
 Lemma shiftr_spec : forall a n m, 0<=m ->
  testbit (shiftr a n) m = testbit a (m+n).
 Proof.
- intros a n m. zify. apply Z.shiftr_spec.
+ intros a n m. zify_strat. apply Z.shiftr_spec.
 Qed.
 
 Lemma shiftl_spec_high : forall a n m, 0<=m -> n<=m ->
  testbit (shiftl a n) m = testbit a (m-n).
 Proof.
- intros a n m. zify. intros Hn H. rewrite Z.max_r by auto with zarith.
+ intros a n m. zify_strat. intros Hn H. rewrite Z.max_r by auto with zarith.
  now apply Z.shiftl_spec_high.
 Qed.
 
 Lemma shiftl_spec_low : forall a n m, m<n ->
  testbit (shiftl a n) m = false.
 Proof.
- intros a n m. zify. intros H. now apply Z.shiftl_spec_low.
+ intros a n m. zify_strat. intros H. now apply Z.shiftl_spec_low.
 Qed.
 
 Lemma land_spec : forall a b n,
  testbit (land a b) n = testbit a n && testbit b n.
 Proof.
- intros a n m. zify. now apply Z.land_spec.
+ intros a n m. zify_strat. now apply Z.land_spec.
 Qed.
 
 Lemma lor_spec : forall a b n,
  testbit (lor a b) n = testbit a n || testbit b n.
 Proof.
- intros a n m. zify. now apply Z.lor_spec.
+ intros a n m. zify_strat. now apply Z.lor_spec.
 Qed.
 
 Lemma ldiff_spec : forall a b n,
  testbit (ldiff a b) n = testbit a n && negb (testbit b n).
 Proof.
- intros a n m. zify. now apply Z.ldiff_spec.
+ intros a n m. zify_strat. now apply Z.ldiff_spec.
 Qed.
 
 Lemma lxor_spec : forall a b n,
  testbit (lxor a b) n = xorb (testbit a n) (testbit b n).
 Proof.
- intros a n m. zify. now apply Z.lxor_spec.
+ intros a n m. zify_strat. now apply Z.lxor_spec.
 Qed.
 
 Lemma div2_spec : forall a, div2 a == shiftr a 1.
 Proof.
- intros a. zify. now apply Z.div2_spec.
+ intros a. zify_strat. now apply Z.div2_spec.
 Qed.
 
 (** Recursion *)
@@ -491,10 +493,10 @@ Theorem recursion_succ :
 Proof.
 unfold eq, recursion; intros A Aeq a f EAaa f_wd n.
 replace (to_N (succ n)) with (N.succ (to_N n)) by
- (zify; now rewrite <- Z2N.inj_succ by apply spec_pos).
+ (zify_strat; now rewrite <- Z2N.inj_succ by apply spec_pos).
 rewrite N.peano_rect_succ.
 apply f_wd; auto.
-zify. now rewrite Z2N.id by apply spec_pos.
+zify_strat. now rewrite Z2N.id by apply spec_pos.
 fold (recursion a f n). apply recursion_wd; auto. red; auto.
 Qed.
 

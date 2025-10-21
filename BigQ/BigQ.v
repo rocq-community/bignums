@@ -105,7 +105,7 @@ Declare Equivalent Keys pow_N pow_pos.
 Lemma BigQpowerth :
  power_theory 1 BigQ.mul BigQ.eq Z.of_N BigQ.power.
 Proof.
-constructor. intros. BigQ.qify.
+constructor. intros. BigQ.qify_strat.
 replace (BigQ.to_Q r ^ Z.of_N n)%Q with (pow_N 1 Qmult (BigQ.to_Q r) n)%Q by (now destruct n).
 destruct n. reflexivity.
 induction p; simpl; auto; rewrite ?BigQ.spec_mul, ?IHp; reflexivity.
@@ -178,5 +178,5 @@ End TestOrder.
 
 Section TestQify.
 Let test : forall x : bigQ, 0+x == 1*x.
-Proof. intro x. BigQ.qify. ring. Defined.
+Proof. intro x. BigQ.qify_strat. ring. Defined.
 End TestQify.
