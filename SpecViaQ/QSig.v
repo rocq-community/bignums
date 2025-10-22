@@ -105,6 +105,9 @@ Hint Rewrite
 Ltac qify := unfold eq, lt, le in *; autorewrite with qsimpl;
  try rewrite spec_0 in *; try rewrite spec_1 in *; try rewrite spec_m1 in *.
 
+Ltac qify_strat := unfold eq, lt, le in *; try (rewrite_strat (repeat (topdown (hints qsimpl))));
+ try rewrite spec_0 in *; try rewrite spec_1 in *; try rewrite spec_m1 in *.
+
 (** NB: do not add [spec_0] in the autorewrite database. Otherwise,
     after instantiation in BigQ, this lemma become convertible to 0=0,
     and autorewrite loops. Idem for [spec_1] and [spec_m1] *)
@@ -114,7 +117,10 @@ Ltac qify := unfold eq, lt, le in *; autorewrite with qsimpl;
 Ltac solve_wd1 := intros x x' Hx; qify; now rewrite Hx.
 Ltac solve_wd2 := intros x x' Hx y y' Hy; qify; now rewrite Hx, Hy.
 
-Local Obligation Tactic := solve_wd2 || solve_wd1.
+Ltac solve_wd1_strat := intros x x' Hx; qify_strat; now rewrite Hx.
+Ltac solve_wd2_strat := intros x x' Hx y y' Hy; qify_strat; now rewrite Hx, Hy.
+
+Local Obligation Tactic := solve_wd2_strat || solve_wd1_strat.
 
 #[global]
 Instance : Measure to_Q := {}.
@@ -158,7 +164,7 @@ Program Instance power_wd : Proper (eq==>Logic.eq==>eq) power.
 (** Let's implement [HasCompare] *)
 
 Lemma compare_spec : forall x y, CompareSpec (x==y) (x<y) (y<x) (compare x y).
-Proof. intros. qify. destruct (Qcompare_spec [x] [y]); auto. Qed.
+Proof. intros. qify_strat. destruct (Qcompare_spec [x] [y]); auto. Qed.
 
 (** Let's implement [TotalOrder] *)
 
@@ -170,7 +176,7 @@ Proof.
 Qed.
 
 Lemma le_lteq : forall x y, x<=y <-> x<y \/ x==y.
-Proof. intros. qify. apply Qle_lteq. Qed.
+Proof. intros. qify_strat. apply Qle_lteq. Qed.
 
 Lemma lt_total : forall x y, x<y \/ x==y \/ y<x.
 Proof. intros. destruct (compare_spec x y); auto. Qed.
@@ -180,7 +186,7 @@ Proof. intros. destruct (compare_spec x y); auto. Qed.
 Definition eqb := eq_bool.
 
 Lemma eqb_eq : forall x y, eq_bool x y = true <-> x == y.
-Proof. intros. qify. apply Qeq_bool_iff. Qed.
+Proof. intros. qify_strat. apply Qeq_bool_iff. Qed.
 
 Lemma eqb_correct : forall x y, eq_bool x y = true -> x == y.
 Proof. now apply eqb_eq. Qed.
@@ -191,56 +197,56 @@ Proof. now apply eqb_eq. Qed.
 (** Let's implement [HasMinMax] *)
 
 Lemma max_l : forall x y, y<=x -> max x y == x.
-Proof. intros x y. qify. apply Qminmax.Q.max_l. Qed.
+Proof. intros x y. qify_strat. apply Qminmax.Q.max_l. Qed.
 
 Lemma max_r : forall x y, x<=y -> max x y == y.
-Proof. intros x y. qify. apply Qminmax.Q.max_r. Qed.
+Proof. intros x y. qify_strat. apply Qminmax.Q.max_r. Qed.
 
 Lemma min_l : forall x y, x<=y -> min x y == x.
-Proof. intros x y. qify. apply Qminmax.Q.min_l. Qed.
+Proof. intros x y. qify_strat. apply Qminmax.Q.min_l. Qed.
 
 Lemma min_r : forall x y, y<=x -> min x y == y.
-Proof. intros x y. qify. apply Qminmax.Q.min_r. Qed.
+Proof. intros x y. qify_strat. apply Qminmax.Q.min_r. Qed.
 
 (** Q is a ring *)
 
 Lemma add_0_l : forall x, 0+x == x.
-Proof. intros. qify. apply Qplus_0_l. Qed.
+Proof. intros. qify_strat. apply Qplus_0_l. Qed.
 
 Lemma add_comm : forall x y, x+y == y+x.
-Proof. intros. qify. apply Qplus_comm. Qed.
+Proof. intros. qify_strat. apply Qplus_comm. Qed.
 
 Lemma add_assoc : forall x y z, x+(y+z) == x+y+z.
-Proof. intros. qify. apply Qplus_assoc. Qed.
+Proof. intros. qify_strat. apply Qplus_assoc. Qed.
 
 Lemma mul_1_l : forall x, 1*x == x.
-Proof. intros. qify. apply Qmult_1_l. Qed.
+Proof. intros. qify_strat. apply Qmult_1_l. Qed.
 
 Lemma mul_comm : forall x y, x*y == y*x.
-Proof. intros. qify. apply Qmult_comm. Qed.
+Proof. intros. qify_strat. apply Qmult_comm. Qed.
 
 Lemma mul_assoc : forall x y z, x*(y*z) == x*y*z.
-Proof. intros. qify. apply Qmult_assoc. Qed.
+Proof. intros. qify_strat. apply Qmult_assoc. Qed.
 
 Lemma mul_add_distr_r : forall x y z, (x+y)*z == x*z + y*z.
-Proof. intros. qify. apply Qmult_plus_distr_l. Qed.
+Proof. intros. qify_strat. apply Qmult_plus_distr_l. Qed.
 
 Lemma sub_add_opp : forall x y, x-y == x+(-y).
-Proof. intros. qify. now unfold Qminus. Qed.
+Proof. intros. qify_strat. now unfold Qminus. Qed.
 
 Lemma add_opp_diag_r : forall x, x+(-x) == 0.
-Proof. intros. qify. apply Qplus_opp_r. Qed.
+Proof. intros. qify_strat. apply Qplus_opp_r. Qed.
 
 (** Q is a field *)
 
 Lemma neq_1_0 : 1!=0.
-Proof. intros. qify. apply Q_apart_0_1. Qed.
+Proof. intros. qify_strat. apply Q_apart_0_1. Qed.
 
 Lemma div_mul_inv : forall x y, x/y == x*(/y).
-Proof. intros. qify. now unfold Qdiv. Qed.
+Proof. intros. qify_strat. now unfold Qdiv. Qed.
 
 Lemma mul_inv_diag_l : forall x, x!=0 -> /x * x == 1.
-Proof. intros x. qify. rewrite Qmult_comm. apply Qmult_inv_r. Qed.
+Proof. intros x. qify_strat. rewrite Qmult_comm. apply Qmult_inv_r. Qed.
 
 End QProperties.
 

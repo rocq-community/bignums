@@ -94,7 +94,13 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
   spec_Z_of_N spec_Zabs_N
  : nz.
 
+ Ltac nzsimpl_strat := try rewrite_strat (repeat (topdown (hints nz))).
  Ltac nzsimpl := autorewrite with nz in *.
+
+ Ltac qsimpl_strat := try red; unfold to_Q; simpl; intros;
+  destr_eqb; simpl; nzsimpl_strat; intros;
+  rewrite ?Z2Pos.id by auto;
+  auto.
 
  Ltac qsimpl := try red; unfold to_Q; simpl; intros;
   destr_eqb; simpl; nzsimpl; intros;
@@ -120,17 +126,17 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
 
  Lemma spec_0: [zero] == 0.
  Proof.
- simpl. nzsimpl. reflexivity.
+ simpl. nzsimpl_strat. reflexivity.
  Qed.
 
  Lemma spec_1: [one] == 1.
  Proof.
- simpl. nzsimpl. reflexivity.
+ simpl. nzsimpl_strat. reflexivity.
  Qed.
 
  Lemma spec_m1: [minus_one] == -(1).
  Proof.
- simpl. nzsimpl. reflexivity.
+ simpl. nzsimpl_strat. reflexivity.
  Qed.
 
  Definition compare (x y: t) :=
@@ -155,7 +161,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  Theorem spec_compare: forall q1 q2, (compare q1 q2) = ([q1] ?= [q2]).
  Proof.
  intros [z1 | x1 y1] [z2 | x2 y2];
-   unfold Qcompare, compare; qsimpl.
+   unfold Qcompare, compare; qsimpl_strat.
  Qed.
 
  Definition lt n m := [n] < [m].
@@ -198,11 +204,11 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  Theorem strong_spec_check_int : forall n d, [check_int n d] = [Qq n d].
  Proof.
  intros; unfold check_int.
- nzsimpl.
+ nzsimpl_strat.
  destr_zcompare.
- simpl. rewrite <- H; qsimpl. congruence.
+ simpl. rewrite <- H; qsimpl_strat. congruence.
  reflexivity.
- qsimpl. lia.
+ qsimpl_strat. lia.
  Qed.
 
  (** Normalisation function *)
@@ -220,19 +226,19 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  intros p q; unfold norm.
  assert (Hp := NN.spec_pos (Zabs_N p)).
  assert (Hq := NN.spec_pos q).
- nzsimpl.
+ nzsimpl_strat.
  destr_zcompare.
  (* Eq *)
  rewrite strong_spec_check_int; reflexivity.
  (* Lt *)
  rewrite strong_spec_check_int.
- qsimpl.
+ qsimpl_strat.
  generalize (Zgcd_div_pos (ZZ.to_Z p) (NN.to_Z q)). lia.
  replace (NN.to_Z q) with 0%Z in * by (symmetry; assumption).
  rewrite Zdiv_0_l in *; auto with zarith.
  apply Z.gcd_div_swap; lia.
  (* Gt *)
- qsimpl.
+ qsimpl_strat.
  assert (H' : Z.gcd (ZZ.to_Z p) (NN.to_Z q) = 0%Z).
   generalize (Z.gcd_nonneg (ZZ.to_Z p) (NN.to_Z q)); lia.
  symmetry; apply (Z.gcd_eq_0_l _ _ H'); auto.
@@ -247,12 +253,12 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  unfold norm.
  assert (Hp := NN.spec_pos (Zabs_N p)).
  assert (Hq := NN.spec_pos q).
- nzsimpl.
+ nzsimpl_strat.
  destr_zcompare; rewrite ?strong_spec_check_int.
  (* Eq *)
- qsimpl.
+ qsimpl_strat.
  (* Lt *)
- qsimpl.
+ qsimpl_strat.
  destruct (Z_lt_le_dec 0 (NN.to_Z q)).
  apply Z.gcd_div_gcd; auto with zarith.
  replace (NN.to_Z q) with 0%Z in * by lia.
@@ -311,7 +317,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
 
  Theorem spec_add : forall x y, [add x y] == [x] + [y].
  Proof.
- intros [x | nx dx] [y | ny dy]; unfold Qplus; qsimpl.
+ intros [x | nx dx] [y | ny dy]; unfold Qplus; qsimpl_strat.
  1-2, 4, 6: lia.
  rewrite Pos.mul_1_r, Z2Pos.id; auto.
  rewrite Pos.mul_1_r, Z2Pos.id; auto.
@@ -357,7 +363,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
   [ | rewrite spec_add, spec_add_norm; apply Qeq_refl ].
  rewrite <- strong_spec_red.
  destruct x as [zx|nx dx]; destruct y as [zy|ny dy];
-  simpl; destr_eqb; nzsimpl; simpl; auto.
+  simpl; destr_eqb; nzsimpl_strat; simpl; auto.
  Qed.
 
  Definition opp (x: t): t :=
@@ -428,12 +434,12 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
 
  Theorem spec_mul : forall x y, [mul x y] == [x] * [y].
  Proof.
- intros [x | nx dx] [y | ny dy]; unfold Qmult; simpl; qsimpl.
+ intros [x | nx dx] [y | ny dy]; unfold Qmult; simpl; qsimpl_strat.
  rewrite Pos.mul_1_r, Z2Pos.id; auto.
  rewrite Z.mul_eq_0 in *; intuition lia.
  nsubst; auto with zarith.
  nsubst; auto with zarith.
- nsubst; nzsimpl; auto with zarith.
+ nsubst; nzsimpl_strat; auto with zarith.
  rewrite Pos2Z.inj_mul, 2 Z2Pos.id; auto.
  Qed.
 
@@ -443,7 +449,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  Lemma spec_norm_denum : forall n d,
   [norm_denum n d] == [Qq n d].
  Proof.
- unfold norm_denum; intros; simpl; qsimpl.
+ unfold norm_denum; intros; simpl; qsimpl_strat.
  congruence.
  nsubst; auto with zarith.
  Qed.
@@ -462,8 +468,8 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  intros.
  unfold irred; nzsimpl; simpl.
  destr_zcompare.
- exists 1%Z; nzsimpl; auto.
- exists 0%Z; nzsimpl.
+ exists 1%Z; nzsimpl_strat; auto.
+ exists 0%Z; nzsimpl_strat.
  assert (Z.gcd (ZZ.to_Z n) (NN.to_Z d) = 0%Z).
   generalize (Z.gcd_nonneg (ZZ.to_Z n) (NN.to_Z d)); lia.
  clear H.
@@ -473,9 +479,9 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  exists (Z.gcd (ZZ.to_Z n) (NN.to_Z d)).
  simpl.
  split.
- nzsimpl.
+ nzsimpl_strat.
  rewrite Z.mul_comm; symmetry; apply Zdivide_Zdiv_eq; auto using Z.gcd_divide_l with zarith.
- nzsimpl.
+ nzsimpl_strat.
  rewrite Z.mul_comm; symmetry; apply Zdivide_Zdiv_eq; auto using Z.gcd_divide_r with zarith.
  Qed.
 
@@ -485,13 +491,13 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  intros.
  unfold irred.
  split.
- nzsimpl; intros.
+ nzsimpl_strat; intros.
  destr_zcompare; auto.
  simpl.
- nzsimpl.
+ nzsimpl_strat.
  rewrite H, Zdiv_0_l; auto.
- nzsimpl; destr_zcompare; simpl; auto.
- nzsimpl.
+ nzsimpl_strat; destr_zcompare; simpl; auto.
+ nzsimpl_strat.
  intros.
  generalize (NN.spec_pos d); intros.
  destruct (NN.to_Z d); auto.
@@ -514,7 +520,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  apply (Z.gcd_eq_0_r (ZZ.to_Z n)).
  generalize (Z.gcd_nonneg (ZZ.to_Z n) (NN.to_Z d)); lia.
 
- nzsimpl.
+ nzsimpl_strat.
  apply Z.gcd_div_gcd.
  generalize (NN.spec_pos d); lia.
  generalize (Z.gcd_nonneg (ZZ.to_Z n) (NN.to_Z d)); lia.
@@ -546,13 +552,13 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  Lemma spec_mul_norm_Qz_Qq : forall z n d,
    [mul_norm_Qz_Qq z n d] == [Qq (ZZ.mul z n) d].
  Proof.
- intros z n d; unfold mul_norm_Qz_Qq; nzsimpl; rewrite Zcompare_gt.
- destr_eqb; nzsimpl; intros Hz.
- qsimpl; rewrite Hz; auto.
+ intros z n d; unfold mul_norm_Qz_Qq; nzsimpl_strat; rewrite Zcompare_gt.
+ destr_eqb; nzsimpl_strat; intros Hz.
+ qsimpl_strat; rewrite Hz; auto.
  destruct Z_le_gt_dec as [LE|GT].
- qsimpl.
+ qsimpl_strat.
  rewrite spec_norm_denum.
- qsimpl.
+ qsimpl_strat.
  rewrite Zdiv_gcd_zero in GT; auto with zarith.
  nsubst. rewrite Zdiv_0_l in *; discriminate.
  rewrite <- Z.mul_assoc, (Z.mul_comm (ZZ.to_Z n)), Z.mul_assoc.
@@ -565,32 +571,32 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  Proof.
  unfold Reduced.
  rewrite 2 strong_spec_red, 2 Qred_iff.
- simpl; nzsimpl.
- destr_eqb; intros Hd H; simpl in *; nzsimpl.
+ simpl; nzsimpl_strat.
+ destr_eqb; intros Hd H; simpl in *; nzsimpl_strat.
 
- unfold mul_norm_Qz_Qq; nzsimpl; rewrite Zcompare_gt.
- destr_eqb; intros Hz; simpl; nzsimpl; simpl; auto.
+ unfold mul_norm_Qz_Qq; nzsimpl_strat; rewrite Zcompare_gt.
+ destr_eqb; intros Hz; simpl; nzsimpl_strat; simpl; auto.
  destruct Z_le_gt_dec.
- simpl; nzsimpl.
+ simpl; nzsimpl_strat.
  destr_eqb; simpl; nzsimpl; auto with zarith.
  unfold norm_denum. destr_eqb; simpl; nzsimpl.
  rewrite Hd, Zdiv_0_l; discriminate.
  intros _.
- destr_eqb; simpl; nzsimpl; auto.
- nzsimpl; rewrite Hd, Zdiv_0_l; auto with zarith.
+ destr_eqb; simpl; nzsimpl_strat; auto.
+ nzsimpl_strat; rewrite Hd, Zdiv_0_l; auto with zarith.
 
  rewrite Z2Pos.id in H; auto.
- unfold mul_norm_Qz_Qq; nzsimpl; rewrite Zcompare_gt.
- destr_eqb; intros Hz; simpl; nzsimpl; simpl; auto.
+ unfold mul_norm_Qz_Qq; nzsimpl_strat; rewrite Zcompare_gt.
+ destr_eqb; intros Hz; simpl; nzsimpl_strat; simpl; auto.
  destruct Z_le_gt_dec as [H'|H'].
  simpl; nzsimpl.
- destr_eqb; simpl; nzsimpl; auto.
+ destr_eqb; simpl; nzsimpl_strat; auto.
  intros.
  rewrite Z2Pos.id; auto.
  apply Zgcd_mult_rel_prime; auto.
   generalize (Z.gcd_eq_0_l (ZZ.to_Z z) (NN.to_Z d))
     (Z.gcd_nonneg (ZZ.to_Z z) (NN.to_Z d)); lia.
- destr_eqb; simpl; nzsimpl; auto.
+ destr_eqb; simpl; nzsimpl_strat; auto.
  unfold norm_denum.
  destr_eqb; nzsimpl; simpl; destr_eqb; simpl; auto.
  intros; nzsimpl.
@@ -617,7 +623,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  unfold mul_norm, mul; destruct x; destruct y.
  apply Qeq_refl.
  apply spec_mul_norm_Qz_Qq.
- rewrite spec_mul_norm_Qz_Qq; qsimpl; ring.
+ rewrite spec_mul_norm_Qz_Qq; qsimpl_strat; ring.
 
  rename t0 into nx, t3 into dy, t2 into ny, t1 into dx.
  destruct (spec_irred nx dy) as (g & Hg).
@@ -627,7 +633,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  destruct irred as (n1,d1); destruct irred as (n2,d2).
  simpl @snd in *; destruct Hg as [Hg1 Hg2]; destruct Hg' as [Hg1' Hg2'].
  rewrite spec_norm_denum.
- qsimpl.
+ qsimpl_strat.
 
  match goal with E : (_ * _ = 0)%Z |- _ =>
   rewrite Z.mul_eq_0 in E; destruct E as [Eq|Eq] end.
@@ -666,7 +672,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  destruct irred as (n1,d1); destruct irred as (n2,d2).
  simpl @snd in *; destruct Hg as [Hg1 Hg2]; destruct Hg' as [Hg1' Hg2'].
 
- unfold norm_denum; qsimpl.
+ unfold norm_denum; qsimpl_strat.
 
  assert (NEQ : NN.to_Z dy <> 0%Z) by
   (rewrite Hz; intros EQ; rewrite EQ in *; lia).
@@ -678,7 +684,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
 
  revert H H0.
  rewrite 2 strong_spec_red, 2 Qred_iff; simpl.
- destr_eqb; simpl; nzsimpl; try lia; intros.
+ destr_eqb; simpl; nzsimpl_strat; try lia; intros.
  rewrite Z2Pos.id in *; auto.
 
  apply Zgcd_mult_rel_prime; rewrite Z.gcd_comm;
@@ -719,7 +725,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  rewrite ZZ.spec_compare; destr_zcompare.
  (* 0 = z *)
  rewrite <- H.
- simpl; nzsimpl; compute; auto.
+ simpl; nzsimpl_strat; compute; auto.
  (* 0 < z *)
  simpl.
  destr_eqb; nzsimpl; [ intros; rewrite Z.abs_eq in *; lia | intros _ ].
@@ -741,7 +747,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  rewrite ZZ.spec_compare; destr_zcompare.
  (* 0 = n *)
  rewrite <- H.
- simpl; nzsimpl.
+ simpl; nzsimpl_strat.
  destr_eqb; intros; compute; auto.
  (* 0 < n *)
  simpl.
@@ -762,7 +768,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  intros; rewrite Z.abs_neq in *; lia.
  nsubst; compute; auto.
  set (n':=ZZ.to_Z n) in *; clearbody n'.
- red; simpl; nzsimpl.
+ red; simpl; nzsimpl_strat.
  rewrite Z.abs_neq by lia.
  rewrite Z2Pos.id by lia.
  unfold Qinv; simpl; destruct n'; simpl; auto; try discriminate.
@@ -804,21 +810,21 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  simpl.
  rewrite ZZ.spec_compare; destr_zcompare; auto with qarith.
  (* Qq n d *)
- simpl; nzsimpl; destr_eqb.
+ simpl; nzsimpl_strat; destr_eqb.
  destr_zcompare; simpl; auto with qarith.
- destr_eqb; nzsimpl; auto with qarith.
+ destr_eqb; nzsimpl_strat; auto with qarith.
  intros _ Hd; rewrite Hd; auto with qarith.
- destr_eqb; nzsimpl; auto with qarith.
+ destr_eqb; nzsimpl_strat; auto with qarith.
  intros _ Hd; rewrite Hd; auto with qarith.
  (* 0 < n *)
  destr_zcompare; auto with qarith.
- destr_zcompare; nzsimpl; simpl; auto with qarith; intros.
- destr_eqb; nzsimpl; [ intros; rewrite Z.abs_eq in *; lia | intros _ ].
+ destr_zcompare; nzsimpl_strat; simpl; auto with qarith; intros.
+ destr_eqb; nzsimpl_strat; [ intros; rewrite Z.abs_eq in *; lia | intros _ ].
  rewrite H0; auto with qarith.
  lia.
  (* 0 > n *)
- destr_zcompare; nzsimpl; simpl; auto with qarith.
- destr_eqb; nzsimpl; [ intros; rewrite Z.abs_neq in *; lia | intros _ ].
+ destr_zcompare; nzsimpl_strat; simpl; auto with qarith.
+ destr_eqb; nzsimpl_strat; [ intros; rewrite Z.abs_neq in *; lia | intros _ ].
  rewrite H0; auto with qarith.
  lia.
  Qed.
@@ -830,23 +836,23 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  intros.
  destruct x as [ z | n d ].
  (* Qz *)
- simpl; nzsimpl.
+ simpl; nzsimpl_strat.
  rewrite strong_spec_red, Qred_iff.
- destr_zcompare; simpl; nzsimpl; auto.
- destr_eqb; nzsimpl; simpl; auto.
- destr_eqb; nzsimpl; simpl; auto.
+ destr_zcompare; simpl; nzsimpl_strat; auto.
+ destr_eqb; nzsimpl_strat; simpl; auto.
+ destr_eqb; nzsimpl_strat; simpl; auto.
  (* Qq n d *)
  rewrite strong_spec_red, Qred_iff in H; revert H.
- simpl; nzsimpl.
- destr_eqb; nzsimpl; auto with qarith.
- destr_zcompare; simpl; nzsimpl; auto; intros.
+ simpl; nzsimpl_strat.
+ destr_eqb; nzsimpl_strat; auto with qarith.
+ destr_zcompare; simpl; nzsimpl_strat; auto; intros.
  (* 0 < n *)
- destr_zcompare; simpl; nzsimpl; auto.
- destr_eqb; nzsimpl; simpl; auto.
+ destr_zcompare; simpl; nzsimpl_strat; auto.
+ destr_eqb; nzsimpl_strat; simpl; auto.
  rewrite Z.abs_eq; lia.
  intros _.
- rewrite strong_spec_norm; simpl; nzsimpl.
- destr_eqb; nzsimpl.
+ rewrite strong_spec_norm; simpl; nzsimpl_strat.
+ destr_eqb; nzsimpl_strat.
  rewrite Z.abs_eq; lia.
  intros _.
  rewrite Qred_iff.
@@ -855,13 +861,13 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  rewrite Z2Pos.id in *; auto.
  rewrite Z.gcd_comm; auto.
  (* 0 > n *)
- destr_eqb; nzsimpl; simpl; auto; intros.
- destr_zcompare; simpl; nzsimpl; auto.
- destr_eqb; nzsimpl.
+ destr_eqb; nzsimpl_strat; simpl; auto; intros.
+ destr_zcompare; simpl; nzsimpl_strat; auto.
+ destr_eqb; nzsimpl_strat.
  rewrite Z.abs_neq; lia.
  intros _.
- rewrite strong_spec_norm; simpl; nzsimpl.
- destr_eqb; nzsimpl.
+ rewrite strong_spec_norm; simpl; nzsimpl_strat.
+ destr_eqb; nzsimpl_strat.
  rewrite Z.abs_neq; lia.
  intros _.
  rewrite Qred_iff.
@@ -913,11 +919,11 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  destruct x as [ z | n d ].
  simpl; rewrite ZZ.spec_square; red; auto.
  simpl.
- destr_eqb; nzsimpl; intros.
+ destr_eqb; nzsimpl_strat; intros.
  apply Qeq_refl.
- rewrite NN.spec_square in *; nzsimpl.
+ rewrite NN.spec_square in *; nzsimpl_strat.
  rewrite Z.mul_eq_0 in *; lia.
- rewrite NN.spec_square in *; nzsimpl; nsubst; lia.
+ rewrite NN.spec_square in *; nzsimpl_strat; nsubst; lia.
  rewrite ZZ.spec_square, NN.spec_square.
  red; simpl.
  rewrite Pos2Z.inj_mul; rewrite !Z2Pos.id; auto.
@@ -941,7 +947,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  (* Qq *)
  simpl.
  rewrite ZZ.spec_pow_pos.
- destr_eqb; nzsimpl; intros.
+ destr_eqb; nzsimpl_strat; intros.
  - apply Qeq_sym; apply Qpower_positive_0.
  - rewrite NN.spec_pow_pos in *.
    assert (0 < NN.to_Z d ^ Zpos p)%Z by
@@ -964,12 +970,12 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  red; simpl; auto.
  red; simpl; intros.
  rewrite strong_spec_norm; simpl.
- destr_eqb; nzsimpl; intros.
+ destr_eqb; nzsimpl_strat; intros.
  simpl; auto.
  rewrite Qred_iff.
  revert H.
  unfold Reduced; rewrite strong_spec_red, Qred_iff; simpl.
- destr_eqb; nzsimpl; simpl; intros.
+ destr_eqb; nzsimpl_strat; simpl; intros.
  exfalso.
  rewrite NN.spec_pow_pos in *. nsubst.
  rewrite Z.pow_0_l' in *; [lia|discriminate].
@@ -988,7 +994,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  Theorem spec_power : forall x z, [power x z] == [x]^z.
  Proof.
  destruct z.
- simpl; nzsimpl; red; auto.
+ simpl; nzsimpl_strat; red; auto.
  apply spec_power_pos.
  simpl.
  rewrite spec_inv, spec_power_pos; apply Qeq_refl.
@@ -1004,7 +1010,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  Theorem spec_power_norm : forall x z, [power_norm x z] == [x]^z.
  Proof.
  destruct z.
- simpl; nzsimpl; red; auto.
+ simpl; nzsimpl_strat; red; auto.
  apply spec_power_pos.
  simpl.
  rewrite spec_inv_norm, spec_power_pos; apply Qeq_refl.
@@ -1017,7 +1023,7 @@ Module Make (NN:NType)(ZZ:ZType)(Import NZ:NType_ZType NN ZZ) <: QType.
  destruct z; simpl.
  intros _; unfold Reduced; rewrite strong_spec_red.
  unfold one.
- simpl to_Q; nzsimpl; auto.
+ simpl to_Q; nzsimpl_strat; auto.
  intros; apply strong_spec_power_pos; auto.
  intros; apply strong_spec_inv_norm; apply strong_spec_power_pos; auto.
  Qed.
