@@ -34,14 +34,14 @@ be part of the standard library.
   - Arnaud Spiwack
   - Evgeny Makarov
   - Pierre Letouzey
-- Coq-community maintainer(s):
+- Rocq-community maintainer(s):
   - Pierre Roux ([**@proux01**](https://github.com/proux01))
   - Érik Martin-Dorel ([**@erikmd**](https://github.com/erikmd))
 - License: [GNU Lesser General Public License v2.1](LICENSE)
-- Compatible Coq versions: master (use the corresponding branch or release for other Coq versions)
+- Compatible Rocq/Coq versions: master (use the corresponding branch or release for other Coq versions)
 - Compatible OCaml versions: all versions supported by Coq
 - Additional dependencies: none
-- Coq namespace: `Bignums`
+- Rocq/Coq namespace: `Bignums`
 - Related publication(s): none
 
 ## Building and installation instructions
@@ -50,7 +50,7 @@ The easiest way to install the latest released version of Bignums
 is via [OPAM](https://opam.ocaml.org/doc/Install.html):
 
 ```shell
-opam repo add coq-released https://coq.inria.fr/opam/released
+opam repo add rocq-released https://rocq-prover.org/opam/released
 opam install coq-bignums
 ```
 
