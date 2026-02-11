@@ -54,7 +54,7 @@ keywords:
 - name: integer numbers
 - name: rational numbers
 - name: arithmetic
-- name: arbitrary precision
+- name: arbitrary-precision
 
 categories:
 - name: Miscellaneous/Coq Extensions

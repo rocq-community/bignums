@@ -30,7 +30,7 @@ tags: [
   "keyword:integer numbers"
   "keyword:rational numbers"
   "keyword:arithmetic"
-  "keyword:arbitrary precision"
+  "keyword:arbitrary-precision"
   "logpath:Bignums"
 ]
 authors: [
