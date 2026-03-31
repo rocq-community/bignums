@@ -1,4 +1,4 @@
-Require Import ZArith.
+From Stdlib Require Import ZArith.
 Require Import Bignums.BigQ.BigQ.
 
 Open Scope bigN_scope.
